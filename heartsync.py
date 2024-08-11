@@ -67,7 +67,7 @@ def extract_heart_rate_data(file_path):
 
 
 def get_calendar_events(service):
-    now = datetime.datetime.utcnow().isoformat() + "Z"  # 'Z' indicates UTC time
+    now = datetime.datetime.utcnow().isoformat() + "Z"
     one_year_ago = (
         datetime.datetime.utcnow() - datetime.timedelta(days=365)
     ).isoformat() + "Z"
@@ -83,7 +83,7 @@ def get_calendar_events(service):
                 timeMax=now,
                 singleEvents=True,
                 orderBy="startTime",
-                maxResults=250,  # Adjust this number if you want to try smaller batches
+                maxResults=250,
                 pageToken=page_token,
             )
             .execute()
@@ -102,7 +102,6 @@ def get_calendar_events(service):
         start_dt = pd.to_datetime(start)
         end_dt = pd.to_datetime(end)
 
-        # Localize or convert to UTC as necessary
         if start_dt.tzinfo is None:
             start_dt = start_dt.tz_localize("UTC")
         else:
@@ -124,9 +123,7 @@ def safe_float(num, default=float("-inf")):
     return num if num is not None else default
 
 
-# Main execution block:
 if __name__ == "__main__":
-    # Parsing arguments and initializing data extraction
     parser = argparse.ArgumentParser()
     parser.add_argument("export_file_path", help="Path to the exported XML file")
     parser.add_argument(
@@ -137,7 +134,6 @@ if __name__ == "__main__":
     service = authenticate_google_calendar(args.google_credentials_path)
     event_list = get_calendar_events(service)
 
-    # Processing events and heart rate matches
     for event in event_list:
         mask = (df["time"] >= event["start"]) & (df["time"] <= event["end"])
         matching_records = df.loc[mask, "value"].astype(float)
